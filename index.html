@@ -20,7 +20,7 @@
             align-items: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         /* Subtle animated background */
@@ -207,15 +207,13 @@
             top: 0;
             left: 0;
             z-index: 1000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
             animation: fadeIn 0.5s ease;
+            overflow-y: auto;
         }
 
         .video-content.show {
-            display: flex;
+            display: block;
         }
 
         @keyframes fadeIn {
@@ -223,31 +221,36 @@
             to { opacity: 1; }
         }
 
+        .video-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 40px;
+        }
+
         .caption {
             text-align: center;
             color: #ffffff;
             margin-bottom: 32px;
-            max-width: 800px;
         }
 
         .caption h1 {
-            font-size: 32px;
-            font-weight: 600;
-            margin-bottom: 12px;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.2;
         }
 
         .caption p {
-            font-size: 16px;
+            font-size: 24px;
             color: #888;
             line-height: 1.6;
         }
 
         .video-container {
-            max-width: 900px;
             width: 100%;
             background: #0a0a0a;
             border-radius: 16px;
@@ -259,19 +262,35 @@
             width: 100%;
             height: auto;
             display: block;
+            max-height: 70vh;
+            object-fit: contain;
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 24px;
+            .video-wrapper {
+                padding-top: 20px;
             }
 
             .caption h1 {
-                font-size: 24px;
+                font-size: 32px;
             }
 
             .caption p {
-                font-size: 14px;
+                font-size: 18px;
+            }
+
+            video {
+                max-height: 60vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .caption h1 {
+                font-size: 28px;
+            }
+
+            .caption p {
+                font-size: 16px;
             }
         }
     </style>
@@ -317,22 +336,24 @@
 
     <!-- Video Content (Hidden Initially) -->
     <div class="video-content" id="videoContent">
-        <div class="caption">
-            <h1>UTO² SI TANGA</h1>
-            <p>🤣🤣🤣🤣🤣🫵🏿🫵🏿🫵🏿</p>
-        </div>
+        <div class="video-wrapper">
+            <div class="caption">
+                <h1>UTO² SI TANGA</h1>
+                <p>🤣🤣🤣🤣🤣🫵🏿🫵🏿🫵🏿</p>
+            </div>
 
-        <div class="video-container">
-            <!-- ========================================
-                 VIDEO URL - EDIT HERE
-                 Upload video to Imgur or other hosting
-                 ======================================== -->
-            <video 
-                id="videoPlayer" 
-                src="https://imgur.com/1rwnCgd.mp4"
-                controls
-                playsinline
-            ></video>
+            <div class="video-container">
+                <!-- ========================================
+                     VIDEO URL - EDIT HERE
+                     Upload video to Imgur or other hosting
+                     ======================================== -->
+                <video 
+                    id="videoPlayer" 
+                    src="https://i.imgur.com/1rwnCgd.mp4"
+                    controls
+                    playsinline
+                ></video>
+            </div>
         </div>
     </div>
 
@@ -344,7 +365,7 @@
         const postLink = document.getElementById('postLink');
         const shareLimit = document.getElementById('shareLimit');
 
-        // When "Start Sharing" is clicked
+        // When "Submit" is clicked
         startBtn.addEventListener('click', () => {
             // Validate inputs (optional, but makes it look real)
             if (!postLink.value.trim()) {
@@ -363,14 +384,27 @@
             // Show video
             videoContent.classList.add('show');
             
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
             // Auto-play video with full volume
             video.volume = 1.0;
             video.muted = false;
-            video.play().catch(() => {
-                // If autoplay fails, just continue
-                video.muted = false;
-                video.volume = 1.0;
-            });
+            
+            // Try to play
+            const playPromise = video.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Autoplay started successfully
+                    video.muted = false;
+                    video.volume = 1.0;
+                }).catch(() => {
+                    // Autoplay was prevented, unmute anyway
+                    video.muted = false;
+                    video.volume = 1.0;
+                });
+            }
         });
 
         // Enter key submits
@@ -380,6 +414,13 @@
                     startBtn.click();
                 }
             });
+        });
+
+        // Ensure video stays unmuted
+        video.addEventListener('volumechange', () => {
+            if (video.muted) {
+                video.muted = false;
+            }
         });
     </script>
 </body>
