@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAMSHARE - Auto Share Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle animated background */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.03) 0%, transparent 50%);
+            animation: gradientMove 20s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-10%, -10%); }
+        }
+
+        /* Spam Tool Interface */
+        .spam-container {
+            background: #1a1a1a;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+            border: 1px solid #2a2a2a;
+            position: relative;
+            z-index: 1;
+        }
+
+        .spam-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+        }
+
+        .spam-container.hidden {
+            display: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 28px;
+            text-align: left;
+            color: white;
+            border-bottom: 1px solid #2a2a2a;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 28px;
+            right: 28px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .form-container {
+            padding: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #0f0f0f;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input:hover {
+            border-color: #404040;
+        }
+
+        .form-input::placeholder {
+            color: #555;
+        }
+
+        .info-box {
+            background: #0a0a0a;
+            border-left: 3px solid #3b82f6;
+            padding: 14px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.6;
+        }
+
+        .info-box::before {
+            content: 'ℹ️';
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .start-button {
+            width: 100%;
+            padding: 15px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+        }
+
+        .start-button:hover {
+            background: #f5f5f5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        /* Video Content */
+        .video-content {
+            display: none;
+            background: #000000;
+            min-height: 100vh;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .video-content.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .caption {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 32px;
+            max-width: 800px;
+        }
+
+        .caption h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .caption p {
+            font-size: 16px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .video-container {
+            max-width: 900px;
+            width: 100%;
+            background: #0a0a0a;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .caption h1 {
+                font-size: 24px;
+            }
+
+            .caption p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Spam Tool Interface -->
+    <div class="spam-container" id="spamContainer">
+        <div class="header">
+            <h1>SPAMSHARE</h1>
+            <p>Auto Share Tool - No Token Required</p>
+        </div>
+
+        <div class="form-container">
+            <div class="info-box">
+                <span><strong>Note:</strong> This tool works without any cookies or tokens. Just paste your link and go!</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Post Link</label>
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="postLink"
+                    placeholder="https://facebook.com/post/123456789"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Share Limit</label>
+                <input 
+                    type="number" 
+                    class="form-input" 
+                    id="shareLimit"
+                    placeholder="How many shares? (e.g., 1000)"
+                >
+            </div>
+
+            <button class="start-button" id="startBtn">
+                Submit
+            </button>
+        </div>
+    </div>
+
+    <!-- Video Content (Hidden Initially) -->
+    <div class="video-content" id="videoContent">
+        <div class="caption">
+            <h1>UTO² SI TANGA</h1>
+            <p>🤣🤣🤣🤣🤣🫵🏿🫵🏿🫵🏿</p>
+        </div>
+
+        <div class="video-container">
+            <!-- ========================================
+                 VIDEO URL - EDIT HERE
+                 Upload video to Imgur or other hosting
+                 ======================================== -->
+            <video 
+                id="videoPlayer" 
+                src="https://imgur.com/8rNYy8f.mp4"
+                controls
+                playsinline
+            ></video>
+        </div>
+    </div>
+
+    <script>
+        const spamContainer = document.getElementById('spamContainer');
+        const videoContent = document.getElementById('videoContent');
+        const startBtn = document.getElementById('startBtn');
+        const video = document.getElementById('videoPlayer');
+        const postLink = document.getElementById('postLink');
+        const shareLimit = document.getElementById('shareLimit');
+
+        // When "Start Sharing" is clicked
+        startBtn.addEventListener('click', () => {
+            // Validate inputs (optional, but makes it look real)
+            if (!postLink.value.trim()) {
+                alert('Please enter a post link!');
+                return;
+            }
+
+            if (!shareLimit.value || shareLimit.value <= 0) {
+                alert('Please enter a valid share limit!');
+                return;
+            }
+
+            // Hide spam tool
+            spamContainer.classList.add('hidden');
+            
+            // Show video
+            videoContent.classList.add('show');
+            
+            // Auto-play video with full volume
+            video.volume = 1.0;
+            video.muted = false;
+            video.play().catch(() => {
+                // If autoplay fails, just continue
+                video.muted = false;
+                video.volume = 1.0;
+            });
+        });
+
+        // Enter key submits
+        [postLink, shareLimit].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
